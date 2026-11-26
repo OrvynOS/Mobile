@@ -15,7 +15,7 @@
   <a href="https://orvyn.cash">Website</a> ·
   <a href="https://app.orvyn.cash">App</a> ·
   <a href="https://docs.orvyn.cash">Docs</a> ·
-  <a href="https://x.com/OrvynHQ">X</a> ·
+  <a href="https://x.com/OrvynOS">X</a> ·
   <a href="https://t.me/OrvynHQ">Telegram</a>
 </p>
 
