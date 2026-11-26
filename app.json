@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Orvyn",
+    "slug": "orvyn",
+    "scheme": "orvyn",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#000000",
+    "ios": {
+      "bundleIdentifier": "cash.orvyn.app",
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "cash.orvyn.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-web-browser",
+      [
+        "expo-notifications",
+        {
+          "color": "#F0B90B"
+        }
+      ],
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/adaptive-icon.png",
+          "imageWidth": 160,
+          "backgroundColor": "#000000"
+        }
+      ],
+      "expo-speech-recognition"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
+  }
+}
