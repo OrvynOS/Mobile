@@ -7,6 +7,7 @@ import { tap, type IconName } from "@/ui";
 
 const TABS: Record<string, { label: string; icon: IconName; active: IconName }> = {
   index: { label: "Agents", icon: "person-outline", active: "person" },
+  social: { label: "Social", icon: "people-outline", active: "people" },
   mail: { label: "Mail", icon: "mail-outline", active: "mail" },
   hire: { label: "Hire", icon: "briefcase-outline", active: "briefcase" },
   jobs: { label: "Jobs", icon: "time-outline", active: "time" },
@@ -66,6 +67,7 @@ export default function TabsLayout() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Tabs screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: colors.bg } }} tabBar={(props) => <TabBar state={props.state} navigateToTab={props.navigateToTab} />}>
         <Tabs.Screen name="index" />
+        <Tabs.Screen name="social" />
         <Tabs.Screen name="mail" />
         <Tabs.Screen name="hire" />
         <Tabs.Screen name="jobs" />
