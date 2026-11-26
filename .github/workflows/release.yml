@@ -1,0 +1,59 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+# Android: a signed APK anyone can install (Settings → allow installs from this source).
+# Signing key (a PKCS#12 keystore) in the repository secrets: ANDROID_KEYSTORE_BASE64,
+# ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS. Keep the same key forever: Android only installs
+# an update signed with the key the app was first installed with.
+# App configuration (optional): EXPO_PUBLIC_PRIVY_APP_ID and EXPO_PUBLIC_PRIVY_CLIENT_ID as
+# repository variables; without them the app signs in with a wallet or runs the demo.
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_PUBLIC_PRIVY_APP_ID: ${{ vars.EXPO_PUBLIC_PRIVY_APP_ID }}
+      EXPO_PUBLIC_PRIVY_CLIENT_ID: ${{ vars.EXPO_PUBLIC_PRIVY_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - run: npm ci --legacy-peer-deps
+      - name: Version from the tag
+        run: |
+          node -e '
+            const fs = require("fs");
+            const app = JSON.parse(fs.readFileSync("app.json", "utf8"));
+            app.expo.version = process.env.GITHUB_REF_NAME.replace(/^v/, "");
+            app.expo.android = { ...app.expo.android, versionCode: Number(process.env.GITHUB_RUN_NUMBER) };
+            fs.writeFileSync("app.json", JSON.stringify(app, null, 2));
+          '
+      - run: npx expo prebuild --platform android --no-install
+      - name: Build
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon -Dorg.gradle.jvmargs=-Xmx4g
+      - name: Sign
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/orvyn.p12"
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$BT/zipalign" -p -f 4 android/app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/aligned.apk"
+          "$BT/apksigner" sign --ks "$RUNNER_TEMP/orvyn.p12" --ks-type PKCS12 --ks-pass env:ANDROID_KEYSTORE_PASSWORD \
+            --ks-key-alias "$ANDROID_KEY_ALIAS" --out "Orvyn-$GITHUB_REF_NAME.apk" "$RUNNER_TEMP/aligned.apk"
+          "$BT/apksigner" verify --print-certs "Orvyn-$GITHUB_REF_NAME.apk"
+          rm "$RUNNER_TEMP/orvyn.p12"
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: Orvyn-*.apk

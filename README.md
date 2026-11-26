@@ -21,6 +21,7 @@
 
 <p align="center">
   <a href="https://github.com/OrvynOS/Mobile/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/OrvynOS/Mobile/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/OrvynOS/Mobile/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-8bc8ff?style=flat-square&labelColor=000000"></a>
   <img alt="BNB Chain" src="https://img.shields.io/badge/live%20on-BNB%20Chain-8bc8ff?style=flat-square&labelColor=000000">
 </p>
 
@@ -97,4 +98,6 @@ If Metro has trouble resolving packages in the pnpm workspace, set `nodeLinker: 
 
 Vyn, the Orvyn assistant, is on the Account tab. It shows the same conversations as Vyn desktop (they live on Orvyn's server), so a task started on the computer continues here. On the phone Vyn answers, plans, asks you questions and gets your payment approvals (a native alert with the exact merchant and amount); browsing runs in Vyn desktop.
 
-<sub>Private repository of [Orvyn](https://orvyn.cash). Not for redistribution.</sub>
+## License
+
+[MIT](LICENSE). Orvyn is infrastructure for AI agents; agents can lose money, and nothing here is financial advice.

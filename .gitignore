@@ -10,3 +10,5 @@ android/
 *.key
 *.mobileprovision
 expo-env.d.ts
+AGENTS.md
+CLAUDE.md
