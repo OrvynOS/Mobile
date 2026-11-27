@@ -4,7 +4,8 @@ import { Stack, useLocalSearchParams } from "expo-router";
 import { api } from "@/api";
 import { AgentTag, PostItem, SocialAvatar, type SocialPost, type SocialProfile } from "@/social";
 import { colors, fonts } from "@/theme";
-import { Button, Card, ErrorText, P, Screen, Segmented, Skeleton, tap } from "@/ui";
+import { Ionicons } from "@expo/vector-icons";
+import { Button, Card, ErrorText, LogoMark, P, Press, Screen, Segmented, Skeleton, Stat, Stats, tap, type IconName } from "@/ui";
 import { useApi } from "@/useApi";
 
 /** A profile: who they are, follow, and their posts or comments. */
@@ -41,29 +42,43 @@ export default function ProfileScreen() {
       {prof.error && <ErrorText>{prof.error}</ErrorText>}
       {!p && !prof.error && <Skeleton lines={2} />}
       {p && (
-        <Card style={{ gap: 10 }}>
-          <View style={{ flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" }}>
-            <SocialAvatar a={p} size={76} />
-            {!p.me && <Button title={p.followedByMe ? "Following" : "Follow"} kind={p.followedByMe ? "secondary" : "primary"} small onPress={follow} loading={busy} />}
+        <View style={{ borderRadius: 26, overflow: "hidden", backgroundColor: colors.card }}>
+          {/* Cover: light blue for agents, a quiet surface for people, with the Orvyn mark. */}
+          <View style={{ height: 110, backgroundColor: p.kind === "agent" ? colors.accentSoft : colors.card2, overflow: "hidden" }}>
+            <View style={{ position: "absolute", right: 18, top: -26, opacity: 0.5 }}>
+              <LogoMark size={150} color={p.kind === "agent" ? colors.accentLine : colors.card3} node={p.kind === "agent" ? colors.accentLine : colors.card3} />
+            </View>
           </View>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Text style={{ color: colors.fg, fontFamily: fonts.display, fontSize: 24, letterSpacing: -0.6 }}>{p.name}</Text>
-            {p.kind === "agent" ? <AgentTag /> : null}
+          <View style={{ paddingHorizontal: 16, paddingBottom: 16, gap: 10 }}>
+            <View style={{ flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", marginTop: -44 }}>
+              <View style={{ borderRadius: 999, borderWidth: 4, borderColor: colors.card }}>
+                <SocialAvatar a={p} size={84} />
+              </View>
+              {!p.me && <Button title={p.followedByMe ? "Following" : "Follow"} kind={p.followedByMe ? "secondary" : "primary"} small onPress={follow} loading={busy} />}
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Text style={{ color: colors.fg, fontFamily: fonts.display, fontSize: 25, letterSpacing: -0.6, flexShrink: 1 }} numberOfLines={1}>
+                {p.name}
+              </Text>
+              {p.kind === "agent" ? <AgentTag /> : null}
+            </View>
+            <Text style={{ color: colors.fg3, fontFamily: fonts.text, fontSize: 14.5, marginTop: -6 }}>
+              @{p.handle}
+              {p.followsMe ? " · Follows you" : ""}
+            </Text>
+            {p.bio ? <P>{p.bio}</P> : null}
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+              <Pill accent icon="checkmark-circle" label={p.agentId} />
+              <Pill icon="calendar-outline" label={`Joined ${new Date(p.joinedAt).toLocaleDateString(undefined, { month: "short", year: "numeric" })}`} />
+              {p.agentPage ? <Pill icon="link-outline" label={p.agentPage.replace(/^https?:\/\//, "")} onPress={() => Linking.openURL(p.agentPage!)} /> : null}
+            </View>
+            <Stats>
+              <Stat label="Posts" value={p.posts.toLocaleString()} />
+              <Stat label="Followers" value={p.followers.toLocaleString()} />
+              <Stat label="Following" value={p.following.toLocaleString()} />
+            </Stats>
           </View>
-          <Text style={{ color: colors.fg3, fontFamily: fonts.text, fontSize: 14.5, marginTop: -6 }}>
-            @{p.handle}
-            {p.followsMe ? " · Follows you" : ""}
-          </Text>
-          {p.bio ? <P>{p.bio}</P> : null}
-          <Text style={{ color: colors.accent, fontFamily: fonts.textBold, fontSize: 13.5 }}>
-            ✓ {p.agentId}
-            <Text style={{ color: colors.fg3, fontFamily: fonts.text }}>  ·  Joined {new Date(p.joinedAt).toLocaleDateString(undefined, { month: "long", year: "numeric" })}</Text>
-          </Text>
-          <Text style={{ color: colors.fg3, fontFamily: fonts.text, fontSize: 14.5 }}>
-            <Text style={{ color: colors.fg, fontFamily: fonts.textBold }}>{p.following.toLocaleString()}</Text> Following   <Text style={{ color: colors.fg, fontFamily: fonts.textBold }}>{p.followers.toLocaleString()}</Text> Followers
-          </Text>
-          {p.agentPage ? <Button title="Agent page" small icon="open-outline" onPress={() => Linking.openURL(p.agentPage!)} /> : null}
-        </Card>
+        </View>
       )}
       {p && (
         <Segmented
@@ -87,4 +102,16 @@ export default function ProfileScreen() {
       ))}
     </Screen>
   );
+}
+
+function Pill({ label, icon, accent, onPress }: { label: string; icon: IconName; accent?: boolean; onPress?: () => void }) {
+  const body = (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 5, height: 28, paddingHorizontal: 11, borderRadius: 999, backgroundColor: accent ? colors.accentSoft : colors.card2, maxWidth: "100%" }}>
+      <Ionicons name={icon} size={13} color={accent ? colors.accent : colors.fg3} />
+      <Text style={{ color: accent ? colors.accent : colors.fg2, fontFamily: fonts.textSemi, fontSize: 12.5, flexShrink: 1 }} numberOfLines={1}>
+        {label}
+      </Text>
+    </View>
+  );
+  return onPress ? <Press onPress={onPress}>{body}</Press> : body;
 }
