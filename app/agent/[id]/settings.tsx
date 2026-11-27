@@ -43,7 +43,7 @@ export default function Settings() {
         <>
           <Card style={{ gap: 14 }}>
             <Field label="Persona" value={persona} onChangeText={setPersona} multiline maxLength={2000} placeholder="Who the agent is and how it talks" />
-            <Field label="Strategy" value={strategy} onChangeText={setStrategy} multiline maxLength={4000} placeholder="What autopilot should aim for" />
+            <Field label="Strategy" value={strategy} onChangeText={setStrategy} multiline maxLength={4000} placeholder="What copilot should aim for" />
           </Card>
           <Notice icon="lock-closed-outline">Hard limits come from the agent&apos;s plugins and are enforced in code, whatever the strategy says.</Notice>
           {error && <ErrorText>{error}</ErrorText>}

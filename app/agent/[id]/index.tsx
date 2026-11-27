@@ -99,7 +99,7 @@ export default function AgentScreen() {
 
       {thought && (
         <Card label={`${agent.name} says`} meta={ago(thought.createdAt)}>
-          <Typewriter text={`“${thought.message.replace(/^Autopilot:\s*/, "")}”`} style={{ color: colors.fg, fontFamily: fonts.text, fontSize: 15, lineHeight: 22 }} />
+          <Typewriter text={`“${thought.message.replace(/^(?:Autopilot|Copilot):\s*/, "")}”`} style={{ color: colors.fg, fontFamily: fonts.text, fontSize: 15, lineHeight: 22 }} />
         </Card>
       )}
 
@@ -114,7 +114,7 @@ export default function AgentScreen() {
         </Card>
       )}
 
-      <Card label="Autopilot" meta={agent.autopilotEnabled ? "On" : "Off"}>
+      <Card label="Copilot" meta={agent.autopilotEnabled ? "On" : "Off"}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
           <Text style={{ flex: 1, color: colors.fg2, fontFamily: fonts.text, fontSize: 13.5, lineHeight: 19 }}>
             {agent.autopilotEnabled ? "Trades on its own, inside its plugins' limits." : "Off: the agent doesn't trade on its own."}

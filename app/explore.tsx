@@ -29,7 +29,7 @@ export default function Explore() {
             </View>
           </View>
           <P faint>{a.description || "No description yet."}</P>
-          {a.autopilot && <Badge label="Autopilot" tone="accent" />}
+          {a.autopilot && <Badge label="Copilot" tone="accent" />}
         </Card>
       ))}
     </Screen>

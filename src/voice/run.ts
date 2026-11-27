@@ -36,17 +36,17 @@ export async function runCommand(text: string): Promise<Outcome> {
     case "autopilot": {
       const a = pick(intent.agent, agents);
       if (!a) return { intent: intent.type, say: which() };
-      if (a.status !== "live") return { intent: intent.type, say: `${a.name} hasn't launched yet, so autopilot can't run.` };
-      if (a.autopilotEnabled === intent.on) return { intent: intent.type, say: `${a.name}'s autopilot is already ${intent.on ? "on" : "off"}.` };
+      if (a.status !== "live") return { intent: intent.type, say: `${a.name} hasn't launched yet, so copilot can't run.` };
+      if (a.autopilotEnabled === intent.on) return { intent: intent.type, say: `${a.name}'s copilot is already ${intent.on ? "on" : "off"}.` };
       await api(`/api/agents/${a.id}`, { method: "PATCH", body: { autopilotEnabled: intent.on } });
-      return { intent: intent.type, say: intent.on ? `Autopilot is on. ${a.name} will trade ${minutesLabel(a.autopilotIntervalMin)}, inside its limits.` : `Done. ${a.name} is paused and won't trade on its own.` };
+      return { intent: intent.type, say: intent.on ? `Copilot is on. ${a.name} will trade ${minutesLabel(a.autopilotIntervalMin)}, inside its limits.` : `Done. ${a.name} is paused and won't trade on its own.` };
     }
 
     case "interval": {
       const a = pick(intent.agent, agents);
       if (!a) return { intent: intent.type, say: which() };
       await api(`/api/agents/${a.id}`, { method: "PATCH", body: { autopilotIntervalMin: intent.minutes, ...(a.autopilotEnabled ? {} : { autopilotEnabled: true }) } });
-      return { intent: intent.type, say: `${a.name} now runs ${minutesLabel(intent.minutes)}${a.autopilotEnabled ? "" : ", and I turned its autopilot on"}.` };
+      return { intent: intent.type, say: `${a.name} now runs ${minutesLabel(intent.minutes)}${a.autopilotEnabled ? "" : ", and I turned its copilot on"}.` };
     }
 
     case "balance": {
@@ -67,7 +67,7 @@ export async function runCommand(text: string): Promise<Outcome> {
         const running = agents.filter((x) => x.autopilotEnabled).length;
         const unread = agents.reduce((s, x) => s + x.unreadMail, 0);
         const jobs = agents.reduce((s, x) => s + x.openJobs, 0);
-        return { intent: intent.type, say: `${live} of ${agents.length} agents are live and ${running} on autopilot. ${unread} unread emails, ${jobs} open jobs.` };
+        return { intent: intent.type, say: `${live} of ${agents.length} agents are live and ${running} in copilot. ${unread} unread emails, ${jobs} open jobs.` };
       }
       const [details, price] = await Promise.all([
         api<AgentDetails>(`/api/agents/${a.id}`),
@@ -76,10 +76,10 @@ export async function runCommand(text: string): Promise<Outcome> {
       const change = price?.change24h ?? (details.token?.change24hPct == null ? null : details.token.change24hPct / 100);
       const last = details.logs.find((l) => l.kind === "think" || l.kind === "trade");
       const parts = [
-        `${a.name} is ${a.status === "live" ? (a.autopilotEnabled ? "running on autopilot" : "live, autopilot off") : "waiting for its launch funds"}.`,
+        `${a.name} is ${a.status === "live" ? (a.autopilotEnabled ? "running in copilot" : "live, copilot off") : "waiting for its launch funds"}.`,
         change != null ? `Its token is ${change >= 0 ? "up" : "down"} ${pct(Math.abs(change)).replace("+", "")} today.` : "",
         details.wallet.balanceBnb != null ? `Treasury: ${num(details.wallet.balanceBnb, 3)} BNB.` : "",
-        last ? `Latest: ${last.message.replace(/^Autopilot:\s*/, "")}` : "",
+        last ? `Latest: ${last.message.replace(/^(?:Autopilot|Copilot):\s*/, "")}` : "",
       ];
       return { intent: intent.type, say: parts.filter(Boolean).join(" "), navigate: `/agent/${a.id}` };
     }

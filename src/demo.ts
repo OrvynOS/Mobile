@@ -200,7 +200,7 @@ function seed() {
       { id: "knowledge-base", name: "Custom Knowledge Base", category: "knowledge", enabled: false, budgetBnb: 0, feeSharePct: 0, config: {} },
     ],
     logs: [
-      { id: 1, kind: "think", message: "Autopilot: CAKE held support while volume rose. Bought 0.2 BNB worth, stop 5% below.", createdAt: now - 40 * MIN },
+      { id: 1, kind: "think", message: "Copilot: CAKE held support while volume rose. Bought 0.2 BNB worth, stop 5% below.", createdAt: now - 40 * MIN },
       { id: 2, kind: "trade", message: "Bought 0.2 BNB of CAKE on PancakeSwap.", createdAt: now - 39 * MIN },
       { id: 3, kind: "mail", message: "Replied to dana@helixlabs.io about the partnership question.", createdAt: now - 3 * HOUR },
       { id: 4, kind: "fees", message: "Received 0.31 BNB from $ATLAS's trade tax.", createdAt: now - 6 * HOUR },
@@ -237,7 +237,7 @@ function seed() {
       { id: "fourmeme", name: "four.meme Trader", category: "capability", enabled: true, budgetBnb: 0.14, feeSharePct: 50, config: {} },
       { id: "market-pulse", name: "Market Pulse", category: "data", enabled: true, budgetBnb: 0, feeSharePct: 0, config: {} },
     ],
-    logs: [{ id: 1, kind: "think", message: "Autopilot is off. Last session: no launch met the liquidity minimum.", createdAt: now - 2 * DAY }],
+    logs: [{ id: 1, kind: "think", message: "Copilot is off. Last session: no launch met the liquidity minimum.", createdAt: now - 2 * DAY }],
     trades: [],
     mail: { enabled: true, displayName: "Nova (Orvyn agent)", blocked: [], forwardToOwner: false },
   };
@@ -264,7 +264,7 @@ function seed() {
   const mail: Mail[] = [
     {
       id: 101, agentId: atlas.id, direction: "in", status: "received", author: null, from: { address: "dana@helixlabs.io", name: "Dana Reyes" }, to: [agentEmail(atlas)],
-      subject: "Data partnership?", text: "Hi Atlas,\n\nWe run Helix Labs and publish on-chain flow data. Would you want early access to our BTC perps flow feed for your autopilot?\n\nBest,\nDana", read: true, automated: false, createdAt: now - 4 * HOUR, auth: pass,
+      subject: "Data partnership?", text: "Hi Atlas,\n\nWe run Helix Labs and publish on-chain flow data. Would you want early access to our BTC perps flow feed for your copilot?\n\nBest,\nDana", read: true, automated: false, createdAt: now - 4 * HOUR, auth: pass,
     },
     {
       id: 102, agentId: atlas.id, direction: "out", status: "sent", author: "agent", from: { address: agentEmail(atlas), name: "Atlas" }, to: ["dana@helixlabs.io"],
@@ -346,7 +346,7 @@ function seed() {
 
   // The agents keep working while you watch: a new event every so often, for the live feed.
   const HEARTBEAT: { agent: Agent; kind: string; message: string }[] = [
-    { agent: atlas, kind: "think", message: "Autopilot: BTC funding still negative and price holding 64k. Keeping the long, stop unchanged at 61.0k." },
+    { agent: atlas, kind: "think", message: "Copilot: BTC funding still negative and price holding 64k. Keeping the long, stop unchanged at 61.0k." },
     { agent: nova, kind: "plugin", message: "Scanned 12 new four.meme launches: 1 passed the liquidity minimum. Watching it." },
     { agent: atlas, kind: "trade", message: "Raised the BTC stop to 62.4k to lock in gains (+2.1% on the position)." },
     { agent: atlas, kind: "mail", message: "Replied to sam.holder@gmail.com: explained the ETH exit (momentum faded, took +6.1%)." },
@@ -618,7 +618,7 @@ export async function demoApi(method: string, rawPath: string, body: unknown): P
     if (rest.length === 0) {
       if (method === "PATCH") {
         Object.assign(a, Object.fromEntries(Object.entries(b).filter(([k]) => ["autopilotEnabled", "autopilotIntervalMin", "persona", "strategy"].includes(k))));
-        if (b.autopilotEnabled !== undefined) a.logs.unshift({ id: nextId(), kind: "plugin", message: `Autopilot turned ${b.autopilotEnabled ? "on" : "off"} from Orvyn Mobile.`, createdAt: Date.now() });
+        if (b.autopilotEnabled !== undefined) a.logs.unshift({ id: nextId(), kind: "plugin", message: `Copilot turned ${b.autopilotEnabled ? "on" : "off"} from Orvyn Mobile.`, createdAt: Date.now() });
         return ok(agentView(a));
       }
       return ok({

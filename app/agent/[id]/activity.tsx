@@ -9,7 +9,7 @@ import { Badge, Card, Empty, ErrorText, Screen, Segmented, Skeleton, t, type Ico
 import { useApi } from "@/useApi";
 
 const KIND: Record<string, { icon: IconName; color: string; label: string }> = {
-  think: { icon: "sparkles", color: colors.accent, label: "Autopilot" },
+  think: { icon: "sparkles", color: colors.accent, label: "Copilot" },
   trade: { icon: "swap-horizontal", color: colors.cyan, label: "Trade" },
   fees: { icon: "cash", color: colors.up, label: "Fees" },
   bridge: { icon: "git-network", color: colors.warn, label: "Bridge" },

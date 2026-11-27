@@ -62,14 +62,14 @@ export function parse(raw: string, agents: AgentRef[]): Intent {
 
   if (has(text, "help", "commands") || /what can (you|i) (do|say)/.test(text)) return { type: "help" };
 
-  // Autopilot on/off: "turn on autopilot for atlas", "pause nova", "start atlas", "stop trading"
+  // Copilot on/off: "turn on autopilot for atlas", "pause nova", "start atlas", "stop trading"
   const offWords = /\b(turn off|switch off|disable|stop|pause|halt|kill)\b/.test(text);
   const onWords = /\b(turn on|switch on|enable|start|resume|activate|unpause)\b/.test(text);
   const minutes = findMinutes(text);
-  if (minutes && (has(text, "every", "interval", "run", "runs", "set", "change", "make") || has(text, "autopilot"))) {
+  if (minutes && (has(text, "every", "interval", "run", "runs", "set", "change", "make") || has(text, "autopilot", "copilot"))) {
     return { type: "interval", agent, minutes: Math.min(180, Math.max(1, minutes)) };
   }
-  if ((offWords || onWords) && (has(text, "autopilot", "trading", "trade", "agent") || agent)) {
+  if ((offWords || onWords) && (has(text, "autopilot", "copilot", "trading", "trade", "agent") || agent)) {
     return { type: "autopilot", agent, on: !offWords || /\bunpause\b/.test(text) };
   }
 
@@ -117,7 +117,7 @@ export function suggestions(agents: AgentRef[]) {
     "Read my mail",
     `Set ${name} to every 15 minutes`,
     `Pause ${b?.name ?? name}`,
-    `Turn on autopilot for ${name}`,
+    `Turn in copilot for ${name}`,
     "Open my jobs",
   ];
 }
