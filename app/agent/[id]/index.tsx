@@ -22,6 +22,7 @@ export default function AgentScreen() {
   const { data, error, refreshing, refresh } = useApi<AgentDetails>(`/api/agents/${id}`);
   const jobs = useApi<{ hires: Hire[] }>(`/api/agents/${id}/hires`);
   const mailbox = useApi<{ unread: number }>(`/api/agents/${id}/mail?folder=inbox`);
+  const hiring = useApi<Hiring>(`/api/agents/${id}/hiring`);
   const price = useApi<PriceSeries>(data?.agent.handle && data.agent.status === "live" ? `/api/public/${data.agent.handle}/price?range=24h` : null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -79,6 +80,8 @@ export default function AgentScreen() {
         </View>
         </View>
       </View>
+
+      {data.plugins.some((p) => p.id === "hire-agents" && p.enabled) && hiring.data && <HireRequests agentId={id} view={hiring.data} onDone={() => void hiring.refresh()} />}
 
       <HeroCard label="Treasury" meta={agent.paidUntil ? `Hosted to ${new Date(agent.paidUntil).toLocaleDateString()}` : "Hosting not paid yet"}>
         <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
@@ -183,5 +186,75 @@ export default function AgentScreen() {
 
       <Button title="Withdraw, billing and more on the web" icon="open-outline" onPress={() => Linking.openURL(`${APP_URL}/agents/${id}`)} />
     </Screen>
+  );
+}
+
+interface Hiring {
+  limits: { mode: "ask" | "auto"; maxJobUsd: number; maxDailyUsd: number } | null;
+  spentToday: number;
+  requests: { id: string; agent: { id: string; name?: string; handle?: string | null }; brief: string; reason: string | null; priceUsd: number; token: string; status: string; error: string | null }[];
+  jobs: { id: string; agent: { id: string; name?: string; handle?: string | null }; status: string; brief: string; amount: string }[];
+}
+
+const HIRED_STATUS: Record<string, string> = { awaiting_payment: "Paying", funded: "In progress", delivered: "To review", disputed: "Disputed", released: "Paid", refunded: "Refunded", resolved: "Resolved", expired: "Expired", invalid: "Payment failed" };
+
+/** Hires the agent asked to make (approve and pay, or decline), and the jobs it hired. */
+function HireRequests({ agentId, view, onDone }: { agentId: string; view: Hiring; onDone: () => void }) {
+  const [busy, setBusy] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+  const pending = view.requests.filter((r) => r.status === "pending");
+  const who = (a: { id: string; name?: string; handle?: string | null }) => a.name ?? a.handle ?? a.id;
+
+  async function decide(id: string, approve: boolean) {
+    setBusy(id);
+    setNote(null);
+    try {
+      const r = await api<{ status: string; error: string | null }>(`/api/agents/${agentId}/hiring/${id}`, { method: "POST", body: { approve } });
+      if (r.status === "failed") setNote(`Couldn't hire: ${r.error ?? "the payment failed"}.`);
+      else {
+        success();
+        setNote(approve ? "Hired: the job is paid into escrow." : "Declined.");
+      }
+      onDone();
+    } catch (e) {
+      setNote(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  if (!pending.length && !view.jobs.length) return null;
+  return (
+    <Section title={pending.length ? `Waiting for you (${pending.length})` : "Hired agents"}>
+      {pending.map((r) => (
+        <Card key={r.id} label={`Hire ${who(r.agent)}`} meta={`$${r.priceUsd.toFixed(2)} ${r.token.toUpperCase()}`}>
+          <Text style={{ color: colors.fg, fontFamily: fonts.text, fontSize: 14.5, lineHeight: 21 }} numberOfLines={6}>
+            {r.brief}
+          </Text>
+          {r.reason ? <Text style={{ color: colors.fg3, fontFamily: fonts.text, fontSize: 13.5 }}>Why: {r.reason}</Text> : null}
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <View style={{ flex: 1 }}>
+              <Button kind="primary" title="Approve and pay" icon="checkmark-circle-outline" loading={busy === r.id} onPress={() => void decide(r.id, true)} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button title="Decline" onPress={() => void decide(r.id, false)} disabled={busy === r.id} />
+            </View>
+          </View>
+        </Card>
+      ))}
+      {note ? <Text style={{ color: colors.fg3, fontFamily: fonts.text, fontSize: 13.5 }}>{note}</Text> : null}
+      {view.jobs.length > 0 && (
+        <Card style={{ paddingVertical: 4 }}>
+          {view.jobs.slice(0, 5).map((j, i) => (
+            <Row key={j.id} title={who(j.agent)} subtitle={j.brief} right={<Badge label={HIRED_STATUS[j.status] ?? j.status} tone={j.status === "delivered" ? "warn" : j.status === "released" ? "good" : "plain"} />} last={i === Math.min(view.jobs.length, 5) - 1} />
+          ))}
+        </Card>
+      )}
+      {view.limits ? (
+        <Text style={{ color: colors.fg3, fontFamily: fonts.text, fontSize: 12.5 }}>
+          {view.limits.mode === "auto" ? "Hires on its own" : "Asks you first"} · up to ${view.limits.maxJobUsd} per job, ${view.limits.maxDailyUsd} a day (${view.spentToday.toFixed(2)} used today)
+        </Text>
+      ) : null}
+    </Section>
   );
 }
